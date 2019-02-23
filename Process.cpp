@@ -25,7 +25,7 @@ using std::istringstream;
 using std::string;
 using std::vector;
 
-Process::Process(string file_name_) 
+Process::Process(std::string file_name_) 
 : file_name(file_name_), line_number(0) {
   // Open the trace file.  Abort program if can't open.
   trace.open(file_name, std::ios_base::in);
@@ -33,6 +33,8 @@ Process::Process(string file_name_)
     cerr << "ERROR: failed to open trace file: " << file_name << "\n";
     exit(2);
   }
+  
+  memory = std::make_unique<mem::MMU>(128);
 }
 
 Process::~Process() {
@@ -41,13 +43,13 @@ Process::~Process() {
 
 void Process::Exec(void) {
   // Read and process commands
-  string line;                // text line read
-  string cmd;                 // command from line
+  std::string line;                // text line read
+  std::string cmd;                 // command from line
   vector<uint32_t> cmdArgs;   // arguments from line
   
   // Select the command to execute
   while (ParseCommand(line, cmd, cmdArgs)) {
-    if (cmd == "memsize" ) {
+    if (cmd == "alloc" ) {
       CmdMemsize(line, cmd, cmdArgs);    // allocate memory
     } else if (cmd == "cmp") {
       CmdCmp(line, cmd, cmdArgs);        // get and compare multiple bytes
@@ -67,7 +69,7 @@ void Process::Exec(void) {
 }
 
 bool Process::ParseCommand(
-    string &line, string &cmd, vector<uint32_t> &cmdArgs) {
+    std::string &line, std::string &cmd, vector<uint32_t> &cmdArgs) {
   cmdArgs.clear();
   line.clear();
   
@@ -122,8 +124,14 @@ bool Process::ParseCommand(
   }
 }
 
-void Process::CmdMemsize(const string &line,
-                         const string &cmd,
+void Process::CmdAlloc(const std::string& line, 
+                       const std::string& cmd, 
+                       const std::vector<uint32_t>& cmdArgs) {
+    
+}
+/*
+void Process::CmdMemsize(const std::string &line,
+                         const std::string &cmd,
                          const vector<uint32_t> &cmdArgs) {
   if (cmdArgs.size() == 1) {
     // Round up to next multiple of page size
@@ -135,9 +143,10 @@ void Process::CmdMemsize(const string &line,
     exit(2);
   }
 }
+*/
 
-void Process::CmdCmp(const string &line,
-                     const string &cmd,
+void Process::CmdCmp(const std::string &line,
+                     const std::string &cmd,
                      const vector<uint32_t> &cmdArgs) {
   if (cmdArgs.size() != 3) {
     cerr << "ERROR: badly formatted cmp command\n";
@@ -166,8 +175,8 @@ void Process::CmdCmp(const string &line,
   }
 }
 
-void Process::CmdSet(const string &line,
-                     const string &cmd,
+void Process::CmdSet(const std::string &line,
+                     const std::string &cmd,
                      const vector<uint32_t> &cmdArgs) {
   // Store multiple bytes starting at specified address
   Addr addr = cmdArgs.at(0);
@@ -177,8 +186,8 @@ void Process::CmdSet(const string &line,
   }
 }
 
-void Process::CmdDup(const string &line,
-                     const string &cmd,
+void Process::CmdDup(const std::string &line,
+                     const std::string &cmd,
                      const vector<uint32_t> &cmdArgs) {
   if (cmdArgs.size() != 3) {
     cerr << "ERROR: badly formatted dup command\n";
@@ -202,8 +211,8 @@ void Process::CmdDup(const string &line,
   }
 }
 
-void Process::CmdFill(const string &line,
-                     const string &cmd,
+void Process::CmdFill(const std::string &line,
+                     const std::string &cmd,
                      const vector<uint32_t> &cmdArgs) {
   // Fill destination range with specified value
   uint8_t value = cmdArgs.at(1);
@@ -223,8 +232,8 @@ void Process::CmdFill(const string &line,
   }
 }
 
-void Process::CmdPrint(const string &line,
-                     const string &cmd,
+void Process::CmdPrint(const std::string &line,
+                     const std::string &cmd,
                      const vector<uint32_t> &cmdArgs) {
   Addr addr = cmdArgs.at(0);
   uint32_t count = cmdArgs.at(1);

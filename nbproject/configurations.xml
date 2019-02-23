@@ -39,6 +39,12 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <standard>11</standard>
+          <incDir>
+            <pElem>../MemorySubsystemW2019</pElem>
+          </incDir>
+        </ccTool>
       </compileType>
       <item path="FrameAllocator.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -63,6 +69,10 @@
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <standard>11</standard>
+          <incDir>
+            <pElem>../MemorySubsystemW2019</pElem>
+          </incDir>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
