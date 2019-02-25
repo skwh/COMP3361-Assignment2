@@ -27,6 +27,8 @@ int main(int argc, char** argv) {
         return 1;
     }
     
+    mem::MMU memory(128);
+    FrameAllocator allocator(128);
     Process trace(argv[0]);
     trace.Exec();
     

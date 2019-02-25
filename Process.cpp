@@ -7,6 +7,7 @@
  */
 
 #include "Process.h"
+#include "FrameAllocator.h"
 
 #include <algorithm>
 #include <cctype>
@@ -127,7 +128,7 @@ bool Process::ParseCommand(
 void Process::CmdAlloc(const std::string& line, 
                        const std::string& cmd, 
                        const std::vector<uint32_t>& cmdArgs) {
-    
+     
 }
 /*
 void Process::CmdMemsize(const std::string &line,

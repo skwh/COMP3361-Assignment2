@@ -1,136 +1,90 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
+/* FrameAllocator - allocate pages in memory
+ * 
+ * COMP3361 Winter 2019 - Lab 3 Sample Solution
+ * 
  * File:   FrameAllocator.h
- * Author: Evan Derby & Jason Ghiglieri
- *
- * Created on January 28, 2019, 5:22 PM
+ * Author: Mike Goss <mikegoss@cs.du.edu>
  */
 
 #ifndef FRAMEALLOCATOR_H
 #define FRAMEALLOCATOR_H
 
-#include <vector>
 #include <cstdint>
 #include <string>
+#include <vector>
 
-/*
- * Manages allocation and deallocation of page frames
- */
 class FrameAllocator {
 public:
-    // Single Constructor requiring page_count parameter to initialize the memory vector
-    FrameAllocator(unsigned long page_count);
-    
-    // Rule of 5 fulfilled by deleting the additional constructor types
-    FrameAllocator(const FrameAllocator & orig) = delete;
-    FrameAllocator(FrameAllocator && orig) = delete;
-    FrameAllocator operator=(const FrameAllocator & orig) = delete;
-    FrameAllocator operator=(FrameAllocator && orig) = delete;
-    
-    // empty destructor as specified
-    virtual ~FrameAllocator();
-    
-    /**
-     * 
-     * @param count: Number of page frames to allocate
-     * @param page_frames: Vector on which the addresses allocated page frames 
-     * should be pushed.
-     * @return bool: returns true if the page frames were allocated successfully,
-     *  returns false if there are not enough available page frames to allocate
-     * all of the requested frames. If false, none of the page frames are allocated
-     */
-    bool allocate(uint32_t count, std::vector<uint32_t> &page_frames);
-    
-    /**
-     * 
-     * @param count: The last count page frame addresses are to be popped from
-     * the provided vector
-     * @param page_frames: Vector from which page frames should be popped
-     * @return bool: returns true and removes page frames as specified if count
-     * is not greater than the total size of the provided vector. 
-     * Returns false if more page frames are to be removed than exist in the 
-     * vector and removes none of the page frames.
-     */
-    bool release(uint32_t count, std::vector<uint32_t> &page_frames);
-
-    /**
-     * @return uint32_t: Returns the available number of page frames from the 
-     * private variables of the header file.
-     */
-    uint32_t get_avaliable() const;
-    /**
-     * 
-     * @return std::string: Returns a string representation of the available
-     * list of page frames
-     */
-    std::string get_avaliable_list_string() const;
-    
-    const unsigned long PAGE_FRAME_SIZE = 0x4000;
-    
+  /**
+   * Constructor
+   * 
+   * Allocates the specified number of page frames, and builds free list of
+   * all page frames.
+   * 
+   * @param page_frame_count
+   */
+  FrameAllocator(uint32_t page_frame_count);
+  
+  virtual ~FrameAllocator() {}  // empty destructor
+  
+  // Disallow copy/move
+  FrameAllocator(const FrameAllocator &other) = delete;
+  FrameAllocator(FrameAllocator &&other) = delete;
+  FrameAllocator &operator=(const FrameAllocator &other) = delete;
+  FrameAllocator &operator=(FrameAllocator &&other) = delete;
+  
+  /**
+   * Allocate - allocate page frames from the free list
+   * 
+   * @param count number of page frames to allocate
+   * @param page_frames page frame addresses allocated are pushed on back
+   * @return true if success, false if insufficient page frames (no frames allocated)
+   */
+  bool Allocate(uint32_t count, std::vector<uint32_t> &page_frames);
+  
+  /**
+   * Release - return page frames to free list
+   * 
+   * @param count number of page frames to free
+   * @param page_frames contains page frame addresses to deallocate; addresses
+   *   are popped from back of vector
+   * @return true if success, false if insufficient page frames in vector
+   */
+  bool Release(uint32_t count, std::vector<uint32_t> &page_frames);
+  
+  // Functions to return list info
+  uint32_t get_available(void) const;
+  uint32_t get_frames_total(void) const;
+  
+  /**
+   * get_available_list_string - get string representation of free list
+   * 
+   * @return hex numbers of all free pages
+   */
+  std::string get_available_list_string(void) const;
+  
+  static const uint32_t kPageSize = 0x4000;
 private:
-    /*
-     Inside of the memory array the following variables are stored:
-     * PAGE_FRAMES_TOTAL (OFFSET 0, SIZE 32 BITS / 4 BYTES)
-     * PAGE_FRAMES_AVALIABLE (OFFSET 4 BYTES, SIZE 4 BYTES)
-     * AVALIABLE_LIST_HEAD (OFFSET 8 BYTES, SIZE 4 BYTES)
-     */
-    
-    // Offset variables for repeated use
-    const unsigned long PAGE_FRAMES_TOTAL_OFFSET = 0x0;
-    const unsigned long PAGE_FRAMES_AVALIABLE_OFFSET = 0x4;
-    const unsigned long AVALIABLE_LIST_HEAD_OFFSET = 0x8;
-    
-    // Vector stand in for memory
-    std::vector<uint8_t> memory;
-    
-    /**
-     * Helper method for storing a value in memory. Stores the given value at 
-     * the given address
-     * @param value: value to be stored in memory
-     * @param address: address at which to store the above mentioned value
-     */
-    void store_in_memory(uint32_t value, uint32_t address);
-    /**
-     * Helper method for loading data from memory. Loads data from given address
-     * and stores it in the given value variable
-     * @param value: variable for the loaded data to be stored in
-     * @param address: Address at which to load data from
-     */
-    void load_from_memory(uint32_t &value, uint32_t address) const;
-    
-    /**
-     * Sets the value of the available page frames variable
-     * @param value: value to set the available page frames variable to
-     */
-    void set_frames_avaliable(uint32_t value);
-    /**
-     * Sets pointer of the frame at given address to the given value
-     * @param value: value to set frame pointer to
-     * @param address: address of page frame  whose pointer is to be set
-     */
-    void set_frame_pointer(uint32_t value, uint32_t address);
-    /**
-     * Gets the head value and stores it in value
-     * @param value: variable for the head value to be stored in
-     */
-    void get_head(uint32_t &value) const; 
-    /**
-     * Sets the head value to the given value
-     * @param value: value the head should be set to
-     */
-    void set_head(uint32_t &value);
-    
-    /**
-     * Prints out memory from start_address to end_address
-     * @param start_address: address to start printing from
-     * @param end_address: address to stop printing after
-     */
-    void print_memory(uint32_t start_address, uint32_t end_address) const;
+  // Vector to hold memory to be allocated
+  std::vector<uint8_t> memory;
+  
+  // Address of number of first free page frame
+  static const size_t kFreeListHead = 0;
+  
+  // Total number of page frames
+  static const size_t kPageFramesTotal = kFreeListHead + sizeof(uint32_t);
+  
+  // Current number of free page frames
+  static const size_t kPageFramesFree = kPageFramesTotal + sizeof(uint32_t);
+  
+  // End of list marker
+  static const uint32_t kEndList = 0xFFFFFFFF;
+  
+  // Private getters and setters
+  uint32_t get_free_list_head(void) const;
+  void set_free_list_head(uint32_t free_list_head);
+  void set_page_frames_total(uint32_t page_frames_total);
+  void set_page_frames_free(uint32_t page_frames_free);
 };
 
 #endif /* FRAMEALLOCATOR_H */

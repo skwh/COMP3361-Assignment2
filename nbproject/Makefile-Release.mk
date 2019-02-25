@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/FrameAllocator.o \
+	${OBJECTDIR}/PageTableManager.o \
 	${OBJECTDIR}/Process.o \
 	${OBJECTDIR}/main.o
 
@@ -70,6 +71,11 @@ ${OBJECTDIR}/FrameAllocator.o: FrameAllocator.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I../MemorySubsystemW2019 -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FrameAllocator.o FrameAllocator.cpp
+
+${OBJECTDIR}/PageTableManager.o: PageTableManager.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I../MemorySubsystemW2019 -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PageTableManager.o PageTableManager.cpp
 
 ${OBJECTDIR}/Process.o: Process.cpp
 	${MKDIR} -p ${OBJECTDIR}

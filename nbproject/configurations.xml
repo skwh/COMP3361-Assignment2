@@ -5,6 +5,7 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>FrameAllocator.h</itemPath>
+      <itemPath>PageTableManager.h</itemPath>
       <itemPath>Process.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -15,6 +16,7 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>FrameAllocator.cpp</itemPath>
+      <itemPath>PageTableManager.cpp</itemPath>
       <itemPath>Process.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
@@ -66,6 +68,10 @@
       </item>
       <item path="FrameAllocator.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="PageTableManager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PageTableManager.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Process.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Process.h" ex="false" tool="3" flavor2="0">
@@ -116,6 +122,10 @@
       <item path="FrameAllocator.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="FrameAllocator.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PageTableManager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PageTableManager.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Process.cpp" ex="false" tool="1" flavor2="0">
       </item>

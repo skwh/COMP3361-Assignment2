@@ -1,143 +1,139 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   FrameAllocator.cpp
- * Author: Evan Derby & Jason Ghiglieri
+/* FrameAllocator - allocate pages in memory
  * 
- * Created on January 28, 2019, 5:22 PM
+ * COMP3361 Winter 2019 - Lab 3 Sample Solution
+ * 
+ * File:   FrameAllocator.cpp
+ * Author: Mike Goss <mikegoss@cs.du.edu>
  */
 
 #include "FrameAllocator.h"
 
 #include <cstring>
-#include <iostream>
-#include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
+FrameAllocator::FrameAllocator(uint32_t page_frame_count) 
+: memory(page_frame_count * kPageSize, 0)
+{
+  if (page_frame_count <= 1) {
+    throw std::runtime_error("page_frame_count must be > 1");
+  }
+  
+  // Set free list empty
+  uint32_t free_list_head = kEndList;
+  
+  // Add all page frames except 0 to free list
+  uint32_t frame = memory.size() - kPageSize;
+  
+  while (frame > 0) {
+    memcpy(&memory[frame], &free_list_head, sizeof(uint32_t));
+    free_list_head = frame;
+    frame -= kPageSize;
+  }
+  
+  // Initialize list info in page 0
+  set_free_list_head(free_list_head);
+  set_page_frames_free(page_frame_count - 1);
+  set_page_frames_total(page_frame_count);
+}
 
-FrameAllocator::FrameAllocator(unsigned long page_count) {
-    this->memory = std::vector<uint8_t>(page_count * PAGE_FRAME_SIZE);
+bool FrameAllocator::Allocate(uint32_t count, 
+                              std::vector<uint32_t> &page_frames) {
+  // Fetch free list info
+  uint32_t page_frames_free = get_available();
+  uint32_t free_list_head = get_free_list_head();
+  
+  // If enough pages available, allocate to caller
+  if (count <= page_frames_free) {  // if enough to allocate
+    while (count-- > 0) {
+      // Return next free frame to caller
+      uint32_t frame = free_list_head;
+      page_frames.push_back(frame);
+      
+      // De-link frame from head of free list
+      memcpy(&free_list_head, &memory[free_list_head], sizeof(uint32_t));
+      --page_frames_free;
+      
+      // Clear page frame to all 0
+      memset(&memory[frame], 0, kPageSize);
+    }
     
-    //store the page count in the memory
-    store_in_memory(page_count, PAGE_FRAMES_TOTAL_OFFSET);
-    //store the avaliable page frames in memory: the 0th frame is reserved
-    store_in_memory(page_count - 1, PAGE_FRAMES_AVALIABLE_OFFSET);
-    //store the address of the next page frame in memory, always the page frame size
-    store_in_memory(PAGE_FRAME_SIZE, AVALIABLE_LIST_HEAD_OFFSET);
-    
-    //create the linked list structure
-    uint32_t current_address = PAGE_FRAME_SIZE;
-    while (current_address < page_count * PAGE_FRAME_SIZE) {
-       uint32_t next_address = current_address + PAGE_FRAME_SIZE;
-       if (next_address >= page_count * PAGE_FRAME_SIZE) {
-           store_in_memory(0xFFFFFFFF, current_address);
-           break;
-       }
-       store_in_memory(next_address, current_address);
-       current_address = next_address;
-    }
-}
+    // Update free list info
+    set_free_list_head(free_list_head);
+    set_page_frames_free(page_frames_free);
 
-FrameAllocator::~FrameAllocator() {
-}
-
-bool FrameAllocator::allocate(uint32_t count, std::vector<uint32_t> &page_frames) {
-    if (count > get_avaliable()) {
-        return false;
-    }
-    uint32_t address = 0;
-    uint32_t old_address = 0;
-    int address_count = count;
-    get_head(address);
-    while (address_count > 0) {
-        page_frames.push_back(address);
-        old_address = address;
-        load_from_memory(address, address);
-        set_frame_pointer(0, old_address);
-        address_count--;
-    }
-    set_frames_avaliable(get_avaliable() - count);
-    set_head(address);
     return true;
+  } else {
+    return false;  // do nothing and return error
+  }
 }
 
-bool FrameAllocator::release(uint32_t count, std::vector<uint32_t> &page_frames) {
-    if (count > page_frames.size()) {
-        return false;
+bool FrameAllocator::Release(uint32_t count,
+                             std::vector<uint32_t> &page_frames) {
+  // Fetch free list info
+  uint32_t page_frames_free = get_available();
+  uint32_t free_list_head = get_free_list_head();
+
+  // If enough to deallocate
+  if(count <= page_frames.size()) {
+    while(count-- > 0) {
+      // Return next frame to head of free list
+      uint32_t frame = page_frames.back();
+      page_frames.pop_back();
+      memcpy(&memory[frame], &free_list_head, sizeof(uint32_t));
+      free_list_head = frame;
+      ++page_frames_free;
     }
-    uint32_t end_address;
-    get_head(end_address);
-    int address_count = count;
-    while (address_count > 0) {
-        uint32_t new_frame = page_frames.back();
-        set_frame_pointer(end_address, new_frame);
-        end_address = new_frame;
-        set_head(end_address);
-        page_frames.pop_back();
-        address_count--;
-    }
-    set_frames_avaliable(get_avaliable() + count);
+
+    // Update free list info
+    set_free_list_head(free_list_head);
+    set_page_frames_free(page_frames_free);
+
     return true;
+  } else {
+    return false; // do nothing and return error
+  }
 }
 
-uint32_t FrameAllocator::get_avaliable() const {
-    uint32_t count = 0;
-    load_from_memory(count, PAGE_FRAMES_AVALIABLE_OFFSET);
-    return count;
+std::string FrameAllocator::get_available_list_string(void) const {
+  std::ostringstream out_string;
+  
+  uint32_t next_free = get_free_list_head();
+  
+  while (next_free != kEndList) {
+    out_string << " " << std::hex << next_free;
+    memcpy(&next_free, &memory[next_free], sizeof(uint32_t));
+  }
+  
+  return out_string.str();
 }
 
-std::string FrameAllocator::get_avaliable_list_string() const {
-    std::stringstream list_string;
-    uint32_t read_address;
-    load_from_memory(read_address, AVALIABLE_LIST_HEAD_OFFSET);
-    while (read_address != 0xFFFFFFFF) {
-        list_string << std::hex << read_address << " ";
-        load_from_memory(read_address, read_address);
-    }
-    return list_string.str();
+uint32_t FrameAllocator::get_available() const {
+  uint32_t page_frames_free;
+  memcpy(&page_frames_free, &memory[kPageFramesFree], sizeof(uint32_t));
+  return page_frames_free;
 }
 
-void FrameAllocator::store_in_memory(uint32_t value, uint32_t address) {
-    memcpy(&(this->memory[address]), &value, sizeof(uint32_t));
+uint32_t FrameAllocator::get_frames_total() const {
+  uint32_t page_frames_total;
+  memcpy(&page_frames_total, &memory[kPageFramesTotal], sizeof(uint32_t));
+  return page_frames_total;
 }
 
-void FrameAllocator::load_from_memory(uint32_t &value, uint32_t address) const {
-    memcpy(&value, &(this->memory[address]), sizeof(uint32_t));
+uint32_t FrameAllocator::get_free_list_head() const {
+  uint32_t free_list_head;
+  memcpy(&free_list_head, &memory[kFreeListHead], sizeof(uint32_t));
+  return free_list_head;
 }
 
-void FrameAllocator::set_frames_avaliable(uint32_t value) {
-    store_in_memory(value, PAGE_FRAMES_AVALIABLE_OFFSET);
+void FrameAllocator::set_page_frames_free(uint32_t page_frames_free) {
+  memcpy(&memory[kPageFramesFree], &page_frames_free, sizeof(uint32_t));
 }
 
-void FrameAllocator::set_frame_pointer(uint32_t value, uint32_t address) {
-    store_in_memory(value, address);
+void FrameAllocator::set_page_frames_total(uint32_t page_frames_total) {
+  memcpy(&memory[kPageFramesTotal], &page_frames_total, sizeof(uint32_t));
 }
 
-void FrameAllocator::get_head(uint32_t &value) const {
-    load_from_memory(value, AVALIABLE_LIST_HEAD_OFFSET);
-}
-
-void FrameAllocator::set_head(uint32_t &value) {
-    store_in_memory(value, AVALIABLE_LIST_HEAD_OFFSET);
-}
-
-void FrameAllocator::print_memory(uint32_t start_address, uint32_t end_address) const {
-    int byte_counter = 0;
-    for (uint32_t i = start_address; i <= end_address; i++) {
-        if (byte_counter % 8 == 0) {
-            std::cout << std::setfill('0') << std::setw(7) << std::hex << start_address+i << ": "; 
-        }
-        std::cout << std::setfill('0') << std::setw(2) << std::hex 
-                << static_cast<int>(this->memory[start_address+i]) << " ";
-        byte_counter++;
-        if (byte_counter == 8) {
-            std::cout << std::endl;
-            byte_counter = 0;
-        }
-    }
-    std::cout << std::endl;
+void FrameAllocator::set_free_list_head(uint32_t free_list_head) {
+  memcpy(&memory[kFreeListHead], &free_list_head, sizeof(uint32_t));
 }

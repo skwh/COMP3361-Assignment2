@@ -69,7 +69,9 @@
 #define PROCESS_H
 
 #include <MMU.h>
+#include <PMCB.h>
 
+#include "FrameAllocator.h"
 #include <fstream>
 #include <memory>
 #include <string>
