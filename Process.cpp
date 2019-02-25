@@ -50,7 +50,7 @@ void Process::Exec(void) {
   // Select the command to execute
   while (ParseCommand(line, cmd, cmdArgs)) {
     if (cmd == "alloc" ) {
-      CmdMemsize(line, cmd, cmdArgs);    // allocate memory
+      CmdAlloc(line, cmd, cmdArgs);    // allocate memory
     } else if (cmd == "cmp") {
       CmdCmp(line, cmd, cmdArgs);        // get and compare multiple bytes
     } else if (cmd == "set") {

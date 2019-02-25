@@ -14,7 +14,7 @@
 #include "Process.h"
 
 #include <cstdlib>
-#inlcude <iostream>
+#include <iostream>
 
 using namespace std;
 
