@@ -9,6 +9,7 @@
 #ifndef FRAMEALLOCATOR_H
 #define FRAMEALLOCATOR_H
 
+#include "Process.h"
 #include <cstdint>
 #include <string>
 #include <vector>

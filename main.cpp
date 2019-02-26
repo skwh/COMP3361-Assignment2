@@ -29,6 +29,25 @@ int main(int argc, char** argv) {
     
     mem::MMU memory(128);
     FrameAllocator allocator(128);
+    
+    std::vector<uint32_t> addresses;
+    allocator.Allocate(1, addresses);
+    
+    mem::PageTable kernel_page_table;
+    mem::Addr num_pages = memory.get_frame_count();
+    
+    for (mem::Addr i = 0; i < num_pages; i++) {
+        kernel_page_table.at(i) = 
+                (i << mem::kPageSizeBits) | mem::kPTE_PresentMask | mem::kPTE_WritableMask;
+    }
+    
+    memory.movb(addresses[0], &kernel_page_table, mem::kPageTableSizeBytes);
+    
+    mem::Addr kernelAddress = addresses[0];
+    
+    mem::PMCB kPMCB(kernelAddress);
+    memory.enter_virtual_mode(kPMCB);
+    
     Process trace(argv[0]);
     trace.Exec();
     
