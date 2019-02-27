@@ -24,7 +24,7 @@ public:
    * 
    * @param page_frame_count
    */
-  FrameAllocator(uint32_t page_frame_count);
+  FrameAllocator(uint32_t page_frame_count, mem::MMU& mmu);
   
   virtual ~FrameAllocator() {}  // empty destructor
   
@@ -41,7 +41,7 @@ public:
    * @param page_frames page frame addresses allocated are pushed on back
    * @return true if success, false if insufficient page frames (no frames allocated)
    */
-  bool Allocate(uint32_t count, std::vector<uint32_t> &page_frames);
+  bool Allocate(uint32_t count, std::vector<uint32_t> &page_frames, mem::MMU& mmu);
   
   /**
    * Release - return page frames to free list
@@ -51,7 +51,7 @@ public:
    *   are popped from back of vector
    * @return true if success, false if insufficient page frames in vector
    */
-  bool Release(uint32_t count, std::vector<uint32_t> &page_frames);
+  bool Release(uint32_t count, std::vector<uint32_t> &page_frames, mem::MMU& mmu);
   
   // Functions to return list info
   uint32_t get_available(void) const;
@@ -65,7 +65,7 @@ public:
   std::string get_available_list_string(void) const;
   
   static const uint32_t kPageSize = 0x4000;
-private:
+private:  
   // Vector to hold memory to be allocated
   std::vector<uint8_t> memory;
   

@@ -28,10 +28,10 @@ int main(int argc, char** argv) {
     }
     
     mem::MMU memory(128);
-    FrameAllocator allocator(128);
+    FrameAllocator allocator(128, memory);
     
     std::vector<uint32_t> addresses;
-    allocator.Allocate(1, addresses);
+    allocator.Allocate(1, addresses, memory);
     
     mem::PageTable kernel_page_table;
     mem::Addr num_pages = memory.get_frame_count();

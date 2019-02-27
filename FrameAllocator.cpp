@@ -12,7 +12,8 @@
 #include <sstream>
 #include <stdexcept>
 
-FrameAllocator::FrameAllocator(uint32_t page_frame_count) 
+FrameAllocator::FrameAllocator(uint32_t page_frame_count, 
+                               mem::MMU& mmu) 
 : memory(page_frame_count * kPageSize, 0)
 {
   if (page_frame_count <= 1) {
@@ -26,7 +27,7 @@ FrameAllocator::FrameAllocator(uint32_t page_frame_count)
   uint32_t frame = memory.size() - kPageSize;
   
   while (frame > 0) {
-    memcpy(&memory[frame], &free_list_head, sizeof(uint32_t));
+    mmu.movb(&memory[frame], free_list_head, sizeof(uint32_t));
     free_list_head = frame;
     frame -= kPageSize;
   }
@@ -38,7 +39,8 @@ FrameAllocator::FrameAllocator(uint32_t page_frame_count)
 }
 
 bool FrameAllocator::Allocate(uint32_t count, 
-                              std::vector<uint32_t> &page_frames) {
+                              std::vector<uint32_t> &page_frames,
+                              mem::MMU& mmu) {
   // Fetch free list info
   uint32_t page_frames_free = get_available();
   uint32_t free_list_head = get_free_list_head();
@@ -51,11 +53,11 @@ bool FrameAllocator::Allocate(uint32_t count,
       page_frames.push_back(frame);
       
       // De-link frame from head of free list
-      memcpy(&free_list_head, &memory[free_list_head], sizeof(uint32_t));
+      mmu.movb(free_list_head, &memory[free_list_head], sizeof(uint32_t));
       --page_frames_free;
       
       // Clear page frame to all 0
-      memset(&memory[frame], 0, kPageSize);
+      mmu.movb(&memory[frame], 0, kPageSize);
     }
     
     // Update free list info
@@ -69,7 +71,8 @@ bool FrameAllocator::Allocate(uint32_t count,
 }
 
 bool FrameAllocator::Release(uint32_t count,
-                             std::vector<uint32_t> &page_frames) {
+                             std::vector<uint32_t> &page_frames, 
+                             mem::MMU& mmu) {
   // Fetch free list info
   uint32_t page_frames_free = get_available();
   uint32_t free_list_head = get_free_list_head();
@@ -80,7 +83,7 @@ bool FrameAllocator::Release(uint32_t count,
       // Return next frame to head of free list
       uint32_t frame = page_frames.back();
       page_frames.pop_back();
-      memcpy(&memory[frame], &free_list_head, sizeof(uint32_t));
+      mmu.movb(&memory[frame], free_list_head, sizeof(uint32_t));
       free_list_head = frame;
       ++page_frames_free;
     }
