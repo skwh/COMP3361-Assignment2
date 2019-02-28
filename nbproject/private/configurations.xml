@@ -13,8 +13,6 @@
         <gdb_interceptlist>
           <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
         </gdb_interceptlist>
-        <gdb_signals>
-        </gdb_signals>
         <gdb_options>
           <DebugOptions>
           </DebugOptions>
@@ -30,9 +28,10 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" trace1v.txt</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" data/trace1v.txt</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" ./data/trace1v.txt</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}" data/trace1v.txt</runcommand>
-        <rundir></rundir>
+        <runcommand>"${OUTPUT_PATH}" ./data/trace1v.txt</runcommand>
+        <rundir>/home/evan/NetBeansProjects/Assignment2/.</rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>
         <remove-instrumentation>0</remove-instrumentation>
@@ -65,8 +64,9 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" trace1v.txt</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" data/trace1v.txt</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" ./data/trace1v.txt</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}" data/trace1v.txt</runcommand>
+        <runcommand>"${OUTPUT_PATH}" ./data/trace1v.txt</runcommand>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>

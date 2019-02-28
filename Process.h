@@ -84,7 +84,7 @@ public:
    * 
    * @param file_name_ source of trace commands
    */
-  Process(std::string file_name_, mem::MMU* mmu);
+  Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* alloc);
   
   /**
    * Destructor - close trace file, clean up processing
@@ -111,6 +111,7 @@ private:
 
   // Memory contents
   mem::MMU* memory;
+  FrameAllocator* alloc;
   
   /**
    * ParseCommand - parse a trace file command.

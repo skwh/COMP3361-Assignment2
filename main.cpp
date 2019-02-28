@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     mem::PMCB kPMCB(kernelAddress);
     memory.enter_virtual_mode(kPMCB);
     
-    Process trace(argv[0], &memory);
+    Process trace(argv[1], &memory);
     trace.Exec();
     
     return 0;

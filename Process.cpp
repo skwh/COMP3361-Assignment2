@@ -26,7 +26,7 @@ using std::istringstream;
 using std::string;
 using std::vector;
 
-Process::Process(std::string file_name_, mem::MMU* mmu) 
+Process::Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* allocator) 
 : file_name(file_name_), line_number(0) {
   // Open the trace file.  Abort program if can't open.
   trace.open(file_name, std::ios_base::in);
@@ -36,6 +36,7 @@ Process::Process(std::string file_name_, mem::MMU* mmu)
   }
   
   memory = mmu;
+  alloc = allocator;
 }
 
 Process::~Process() {
@@ -128,7 +129,14 @@ bool Process::ParseCommand(
 void Process::CmdAlloc(const std::string& line, 
                        const std::string& cmd, 
                        const std::vector<uint32_t>& cmdArgs) {
-     
+    Addr vaddr = cmdArgs.at(0);
+    uint32_t count = cmdArgs.at(1);
+    if (vaddr % alloc->kPageSize === 0) {
+        // TODO: allocate pages
+    } else {
+        cerr << "ERROR: alloc vaddr " << vaddr << " is not a multiple of the page size " << alloc->kPageSize << "\n";
+        exit(2);
+    }
 }
 /*
 void Process::CmdMemsize(const std::string &line,

@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
-CND_ARTIFACT_NAME_Debug=comp3361-assignment2
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/comp3361-assignment2
+CND_ARTIFACT_NAME_Debug=assignment2
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/assignment2
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
-CND_PACKAGE_NAME_Debug=comp3361-assignment2.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/comp3361-assignment2.tar
+CND_PACKAGE_NAME_Debug=assignment2.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/assignment2.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux
-CND_ARTIFACT_NAME_Release=comp3361-assignment2
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/comp3361-assignment2
+CND_ARTIFACT_NAME_Release=assignment2
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/assignment2
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
-CND_PACKAGE_NAME_Release=comp3361-assignment2.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/comp3361-assignment2.tar
+CND_PACKAGE_NAME_Release=assignment2.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/assignment2.tar
 #
 # include compiler specific variables
 #
