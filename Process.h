@@ -84,7 +84,7 @@ public:
    * 
    * @param file_name_ source of trace commands
    */
-  Process(std::string file_name_);
+  Process(std::string file_name_, mem::MMU* mmu);
   
   /**
    * Destructor - close trace file, clean up processing
@@ -110,7 +110,7 @@ private:
   long line_number;
 
   // Memory contents
-  std::unique_ptr<mem::MMU> memory;
+  mem::MMU* memory;
   
   /**
    * ParseCommand - parse a trace file command.

@@ -54,20 +54,20 @@ public:
   bool Release(uint32_t count, std::vector<uint32_t> &page_frames, mem::MMU& mmu);
   
   // Functions to return list info
-  uint32_t get_available(void) const;
-  uint32_t get_frames_total(void) const;
+  uint32_t get_available(mem::MMU& mmu) const;
+  uint32_t get_frames_total(mem::MMU& mmu) const;
   
   /**
    * get_available_list_string - get string representation of free list
    * 
    * @return hex numbers of all free pages
    */
-  std::string get_available_list_string(void) const;
+  std::string get_available_list_string(mem::MMU& mmu) const;
   
   static const uint32_t kPageSize = 0x4000;
 private:  
   // Vector to hold memory to be allocated
-  std::vector<uint8_t> memory;
+  // std::vector<uint8_t> memory;
   
   // Address of number of first free page frame
   static const size_t kFreeListHead = 0;
@@ -82,10 +82,10 @@ private:
   static const uint32_t kEndList = 0xFFFFFFFF;
   
   // Private getters and setters
-  uint32_t get_free_list_head(void) const;
-  void set_free_list_head(uint32_t free_list_head);
-  void set_page_frames_total(uint32_t page_frames_total);
-  void set_page_frames_free(uint32_t page_frames_free);
+  uint32_t get_free_list_head(mem::MMU& mmu) const;
+  void set_free_list_head(uint32_t free_list_head, mem::MMU& mmu);
+  void set_page_frames_total(uint32_t page_frames_total, mem::MMU& mmu);
+  void set_page_frames_free(uint32_t page_frames_free, mem::MMU& mmu);
 };
 
 #endif /* FRAMEALLOCATOR_H */

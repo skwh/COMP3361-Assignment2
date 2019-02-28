@@ -26,7 +26,7 @@ using std::istringstream;
 using std::string;
 using std::vector;
 
-Process::Process(std::string file_name_) 
+Process::Process(std::string file_name_, mem::MMU* mmu) 
 : file_name(file_name_), line_number(0) {
   // Open the trace file.  Abort program if can't open.
   trace.open(file_name, std::ios_base::in);
@@ -35,7 +35,7 @@ Process::Process(std::string file_name_)
     exit(2);
   }
   
-  memory = std::make_unique<mem::MMU>(128);
+  memory = mmu;
 }
 
 Process::~Process() {
