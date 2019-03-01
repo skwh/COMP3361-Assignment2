@@ -9,7 +9,8 @@
 #ifndef FRAMEALLOCATOR_H
 #define FRAMEALLOCATOR_H
 
-#include "Process.h"
+#include <MMU.h>
+//#include "Process.h"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -41,7 +42,7 @@ public:
    * @param page_frames page frame addresses allocated are pushed on back
    * @return true if success, false if insufficient page frames (no frames allocated)
    */
-  bool Allocate(uint32_t count, std::vector<uint32_t> &page_frames, mem::MMU& mmu);
+  bool Allocate(uint32_t count, std::vector<uint32_t> &page_frames, mem::MMU& mmu, mem::Addr vaddr = 0xFFFFFFF);
   
   /**
    * Release - return page frames to free list

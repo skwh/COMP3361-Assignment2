@@ -68,10 +68,10 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+#include "FrameAllocator.h"
 #include <MMU.h>
 #include <PMCB.h>
 
-#include "FrameAllocator.h"
 #include <fstream>
 #include <memory>
 #include <string>
@@ -84,7 +84,7 @@ public:
    * 
    * @param file_name_ source of trace commands
    */
-  Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* alloc);
+   Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* allocator);
   
   /**
    * Destructor - close trace file, clean up processing

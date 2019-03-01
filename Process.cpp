@@ -7,7 +7,6 @@
  */
 
 #include "Process.h"
-#include "FrameAllocator.h"
 
 #include <algorithm>
 #include <cctype>
@@ -131,8 +130,11 @@ void Process::CmdAlloc(const std::string& line,
                        const std::vector<uint32_t>& cmdArgs) {
     Addr vaddr = cmdArgs.at(0);
     uint32_t count = cmdArgs.at(1);
-    if (vaddr % alloc->kPageSize === 0) {
+    if (vaddr % alloc->kPageSize == 0) {
         // TODO: allocate pages
+        std::vector<uint32_t> addresses;
+        alloc->Allocate(count, addresses, *memory, vaddr);
+        
     } else {
         cerr << "ERROR: alloc vaddr " << vaddr << " is not a multiple of the page size " << alloc->kPageSize << "\n";
         exit(2);

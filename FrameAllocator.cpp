@@ -52,8 +52,9 @@ FrameAllocator::FrameAllocator(uint32_t page_frame_count,
 }
 
 bool FrameAllocator::Allocate(uint32_t count, 
-                              std::vector<uint32_t> &page_frames,
-                              mem::MMU& mmu) {
+                            std::vector<uint32_t> &page_frames,
+                            mem::MMU& mmu, 
+                            mem::Addr vaddr) {
   // Fetch free list info
   uint32_t page_frames_free = get_available(mmu);
   uint32_t free_list_head = get_free_list_head(mmu);
@@ -66,17 +67,27 @@ bool FrameAllocator::Allocate(uint32_t count,
       page_frames.push_back(frame);
       
       // De-link frame from head of free list
-      mem::Addr startFrame = free_list_head;
       mem::Addr size32 = sizeof(uint32_t);
+      mem::Addr startFrame;
       
-      mmu.movb(startFrame, &free_list_head, size32);
+      if (vaddr == 0xFFFFFFF) {
+        // De-link frame from head of free list
+        startFrame = frame;
+      
+        mmu.movb(startFrame, &free_list_head, size32);
+      }
+      else {
+          startFrame = vaddr;
+          mmu.movb(vaddr, &free_list_head, size32);
+      }
+      
       --page_frames_free;
       
       // Clear page frame to all 0
       uint8_t buffer[] = {0};
       for (int i = 0; i < kPageSize; i++)
       {
-          mmu.movb(frame+i, buffer, sizeof(buffer));
+          mmu.movb(startFrame+i, buffer, sizeof(buffer));
       }
     }
     
