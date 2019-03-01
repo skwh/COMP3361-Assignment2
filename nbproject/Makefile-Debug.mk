@@ -59,13 +59,13 @@ LDLIBSOPTIONS=../MemorySubsystemW2019/dist/Debug/GNU-Linux/libmemorysubsystemw20
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/assignment2
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/comp3361-assignment2
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/assignment2: ../MemorySubsystemW2019/dist/Debug/GNU-Linux/libmemorysubsystemw2019.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/comp3361-assignment2: ../MemorySubsystemW2019/dist/Debug/GNU-Linux/libmemorysubsystemw2019.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/assignment2: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/comp3361-assignment2: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/assignment2 ${OBJECTFILES} ${LDLIBSOPTIONS}
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/comp3361-assignment2 ${OBJECTFILES} ${LDLIBSOPTIONS}
 
 ${OBJECTDIR}/FrameAllocator.o: FrameAllocator.cpp
 	${MKDIR} -p ${OBJECTDIR}

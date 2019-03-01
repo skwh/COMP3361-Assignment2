@@ -14,13 +14,32 @@
 #ifndef PAGETABLEMANAGER_H
 #define PAGETABLEMANAGER_H
 
+#include <MMU.h>
+#include "FrameAllocator.h"
+#include <map>
+
 class PageTableManager {
 public:
-    PageTableManager();
-    PageTableManager(const PageTableManager& orig);
+    PageTableManager(mem::MMU& mem, FrameAllocator& alloc);
+    
+    PageTableManager(const PageTableManager& orig) = delete;
+    PageTableManager(PageTableManager && orig) = delete;
+    PageTableManager operator=(const PageTableManager & orig) = delete;
+    PageTableManager operator=(PageTableManager && orig) = delete;
+    
     virtual ~PageTableManager();
+    
+    int allocate_process_page_table(bool set_active);
+    bool set_process_page_table(int process_id);
+    bool remove_process_page_table(int process_id);
+    
 private:
-
+    int current_process_id_count;
+    
+    mem::MMU& memory;
+    FrameAllocator & frame_allocator;
+    std::map<int, mem::PMCB> process_page_tables;
+    
 };
 
 #endif /* PAGETABLEMANAGER_H */

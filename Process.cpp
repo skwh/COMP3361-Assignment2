@@ -25,7 +25,7 @@ using std::istringstream;
 using std::string;
 using std::vector;
 
-Process::Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* allocator) 
+Process::Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* allocator, PageTableManager* manager) 
 : file_name(file_name_), line_number(0) {
   // Open the trace file.  Abort program if can't open.
   trace.open(file_name, std::ios_base::in);
@@ -36,6 +36,10 @@ Process::Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* allocato
   
   memory = mmu;
   alloc = allocator;
+  table_manager = manager;
+  
+  process_id = table_manager->allocate_process_page_table(true);
+  allocated_page_count = 0;
 }
 
 Process::~Process() {
@@ -47,6 +51,11 @@ void Process::Exec(void) {
   std::string line;                // text line read
   std::string cmd;                 // command from line
   vector<uint32_t> cmdArgs;   // arguments from line
+  
+  if (!table_manager->set_process_page_table(process_id)) {
+      cerr << "There was a problem setting up the process page table!\n";
+      exit(2);
+  }
   
   // Select the command to execute
   while (ParseCommand(line, cmd, cmdArgs)) {
@@ -131,10 +140,15 @@ void Process::CmdAlloc(const std::string& line,
     Addr vaddr = cmdArgs.at(0);
     uint32_t count = cmdArgs.at(1);
     if (vaddr % alloc->kPageSize == 0) {
-        // TODO: allocate pages
         std::vector<uint32_t> addresses;
         alloc->Allocate(count, addresses, *memory, vaddr);
-        
+        if (!table_manager->set_process_page_table(process_id)) {
+            cerr << "ERROR: There was an issue setting the process page table\n";
+            exit(2);
+        }
+        /*Addr address_location_and_size = allocated_page_count * sizeof(uint32_t);
+        memory->movb(address_location_and_size, &addresses, address_location_and_size);
+        allocated_page_count += count;*/
     } else {
         cerr << "ERROR: alloc vaddr " << vaddr << " is not a multiple of the page size " << alloc->kPageSize << "\n";
         exit(2);

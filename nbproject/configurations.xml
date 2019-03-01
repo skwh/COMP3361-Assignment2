@@ -5,7 +5,9 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>FrameAllocator.h</itemPath>
+      <itemPath>PageFaultHandler.h</itemPath>
       <itemPath>PageTableManager.h</itemPath>
+      <itemPath>PermissionFaultHandler.h</itemPath>
       <itemPath>Process.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -68,9 +70,13 @@
       </item>
       <item path="FrameAllocator.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="PageFaultHandler.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="PageTableManager.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PageTableManager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PermissionFaultHandler.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Process.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -123,9 +129,13 @@
       </item>
       <item path="FrameAllocator.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="PageFaultHandler.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="PageTableManager.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="PageTableManager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="PermissionFaultHandler.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Process.cpp" ex="false" tool="1" flavor2="0">
       </item>

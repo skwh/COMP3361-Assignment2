@@ -12,9 +12,13 @@
  */
 
 #include "Process.h"
+#include "PageTableManager.h"
+#include "PageFaultHandler.h"
+#include "PermissionFaultHandler.h"
 
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 using namespace std;
 
@@ -29,6 +33,11 @@ int main(int argc, char** argv) {
     
     mem::MMU memory(128);
     FrameAllocator allocator(128, memory);
+    
+    PageFaultHandler page_fault_handler;
+    PermissionFaultHandler permission_fault_handler;
+    memory.SetPageFaultHandler(std::make_shared<PageFaultHandler>(page_fault_handler));
+    memory.SetWritePermissionFaultHandler(std::make_shared<PermissionFaultHandler>(permission_fault_handler));
     
     std::vector<uint32_t> addresses;
     allocator.Allocate(1, addresses, memory);
@@ -48,7 +57,9 @@ int main(int argc, char** argv) {
     mem::PMCB kPMCB(kernelAddress);
     memory.enter_virtual_mode(kPMCB);
     
-    Process trace(argv[1], &memory, &allocator);
+    PageTableManager table_manager(memory, allocator);
+    
+    Process trace(argv[1], &memory, &allocator, &table_manager);
     trace.Exec();
     
     return 0;

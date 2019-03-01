@@ -26,7 +26,7 @@ FrameAllocator::FrameAllocator(uint32_t page_frame_count,
   // Add all page frames except 0 to free list
   uint32_t frame = kEndList - kPageSize;
   mem::Addr memFrame = (page_frame_count * 0x4000) - kPageSize;
-  int i = 0;
+  
   
   while (memFrame > 0) {
     //uint8_t buffer[] = {(uint8_t)(frame >> 24), (uint8_t)(frame >> 16), (uint8_t)(frame >> 8), (uint8_t)frame};
@@ -38,11 +38,7 @@ FrameAllocator::FrameAllocator(uint32_t page_frame_count,
     free_list_head = memFrame;
     memFrame -= kPageSize;
     
-    i++;
-    if (i == 127)
-    {
-        i = 127;
-    }
+    
   }
   
   // Initialize list info in page 0
@@ -70,6 +66,8 @@ bool FrameAllocator::Allocate(uint32_t count,
       mem::Addr size32 = sizeof(uint32_t);
       mem::Addr startFrame;
       
+      mmu.set_kernel_PMCB();
+      
       if (vaddr == 0xFFFFFFF) {
         // De-link frame from head of free list
         startFrame = frame;
@@ -84,11 +82,8 @@ bool FrameAllocator::Allocate(uint32_t count,
       --page_frames_free;
       
       // Clear page frame to all 0
-      uint8_t buffer[] = {0};
-      for (int i = 0; i < kPageSize; i++)
-      {
-          mmu.movb(startFrame+i, buffer, sizeof(buffer));
-      }
+      int zero = 0;
+      mmu.movb(startFrame, &zero, kPageSize);
     }
     
     // Update free list info

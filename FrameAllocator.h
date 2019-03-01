@@ -42,7 +42,7 @@ public:
    * @param page_frames page frame addresses allocated are pushed on back
    * @return true if success, false if insufficient page frames (no frames allocated)
    */
-  bool Allocate(uint32_t count, std::vector<uint32_t> &page_frames, mem::MMU& mmu, mem::Addr vaddr = 0xFFFFFFF);
+  bool Allocate(uint32_t count, std::vector<uint32_t> &page_frames, mem::Addr vaddr = 0xFFFFFFF);
   
   /**
    * Release - return page frames to free list
@@ -52,18 +52,18 @@ public:
    *   are popped from back of vector
    * @return true if success, false if insufficient page frames in vector
    */
-  bool Release(uint32_t count, std::vector<uint32_t> &page_frames, mem::MMU& mmu);
+  bool Release(uint32_t count, std::vector<uint32_t> &page_frames);
   
   // Functions to return list info
-  uint32_t get_available(mem::MMU& mmu) const;
-  uint32_t get_frames_total(mem::MMU& mmu) const;
+  uint32_t get_available() const;
+  uint32_t get_frames_total() const;
   
   /**
    * get_available_list_string - get string representation of free list
    * 
    * @return hex numbers of all free pages
    */
-  std::string get_available_list_string(mem::MMU& mmu) const;
+  std::string get_available_list_string() const;
   
   static const uint32_t kPageSize = 0x4000;
 private:  
@@ -83,7 +83,7 @@ private:
   static const uint32_t kEndList = 0xFFFFFFFF;
   
   // Private getters and setters
-  uint32_t get_free_list_head(mem::MMU& mmu) const;
+  uint32_t get_free_list_head() const;
   void set_free_list_head(uint32_t free_list_head, mem::MMU& mmu);
   void set_page_frames_total(uint32_t page_frames_total, mem::MMU& mmu);
   void set_page_frames_free(uint32_t page_frames_free, mem::MMU& mmu);

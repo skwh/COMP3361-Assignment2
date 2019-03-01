@@ -69,6 +69,7 @@
 #define PROCESS_H
 
 #include "FrameAllocator.h"
+#include "PageTableManager.h"
 #include <MMU.h>
 #include <PMCB.h>
 
@@ -84,7 +85,7 @@ public:
    * 
    * @param file_name_ source of trace commands
    */
-   Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* allocator);
+   Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* allocator, PageTableManager* manager);
   
   /**
    * Destructor - close trace file, clean up processing
@@ -112,6 +113,10 @@ private:
   // Memory contents
   mem::MMU* memory;
   FrameAllocator* alloc;
+  PageTableManager* table_manager;
+  
+  int process_id;
+  int allocated_page_count;
   
   /**
    * ParseCommand - parse a trace file command.
