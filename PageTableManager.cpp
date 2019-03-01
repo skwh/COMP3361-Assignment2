@@ -23,7 +23,7 @@ PageTableManager::~PageTableManager() {
 int PageTableManager::allocate_process_page_table(bool set_active = true) {
     mem::PageTable new_page_table;
     std::vector<uint32_t> allocated_frames;
-    frame_allocator.Allocate(1, allocated_frames, memory);
+    frame_allocator.allocate(1, allocated_frames);
     uint32_t page_table_base_address = allocated_frames.at(0);
     uint32_t page_table_physical_address;
     memory.ToPhysical(page_table_base_address, page_table_physical_address, true);

@@ -1,175 +1,144 @@
-/* FrameAllocator - allocate pages in memory
- * 
- * COMP3361 Winter 2019 - Lab 3 Sample Solution
- * 
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/* 
  * File:   FrameAllocator.cpp
- * Author: Mike Goss <mikegoss@cs.du.edu>
+ * Author: evan
+ * 
+ * Created on January 28, 2019, 5:22 PM
  */
 
 #include "FrameAllocator.h"
 
 #include <cstring>
+#include <iostream>
+#include <iomanip>
 #include <sstream>
-#include <stdexcept>
 
-FrameAllocator::FrameAllocator(uint32_t page_frame_count, 
-                               mem::MMU& mmu) 
-//: memory(page_frame_count * kPageSize, 0)
-{
-  if (page_frame_count <= 1) {
-    throw std::runtime_error("page_frame_count must be > 1");
-  }
-  
-  // Set free list empty
-  uint32_t free_list_head = kEndList;
-  
-  // Add all page frames except 0 to free list
-  uint32_t frame = kEndList - kPageSize;
-  mem::Addr memFrame = (page_frame_count * 0x4000) - kPageSize;
-  
-  
-  while (memFrame > 0) {
-    //uint8_t buffer[] = {(uint8_t)(frame >> 24), (uint8_t)(frame >> 16), (uint8_t)(frame >> 8), (uint8_t)frame};
-    //memcpy(&memory[frame], &free_list_head, sizeof(uint32_t));
-    mem::Addr size32 = sizeof(uint32_t);
-    mmu.movb(memFrame, &free_list_head, size32); 
-          
-    //mmu.movb(&memory[frame], free_list_head, sizeof(uint32_t));
-    free_list_head = memFrame;
-    memFrame -= kPageSize;
-    
-    
-  }
-  
-  // Initialize list info in page 0
-  set_free_list_head(free_list_head, mmu);
-  set_page_frames_free(page_frame_count - 1, mmu);
-  set_page_frames_total(page_frame_count, mmu);
-}
 
-bool FrameAllocator::Allocate(uint32_t count, 
-                            std::vector<uint32_t> &page_frames,
-                            mem::MMU& mmu, 
-                            mem::Addr vaddr) {
-  // Fetch free list info
-  uint32_t page_frames_free = get_available(mmu);
-  uint32_t free_list_head = get_free_list_head(mmu);
-  
-  // If enough pages available, allocate to caller
-  if (count <= page_frames_free) {  // if enough to allocate
-    while (count-- > 0) {
-      // Return next free frame to caller
-      uint32_t frame = free_list_head;
-      page_frames.push_back(frame);
-      
-      // De-link frame from head of free list
-      mem::Addr size32 = sizeof(uint32_t);
-      mem::Addr startFrame;
-      
-      mmu.set_kernel_PMCB();
-      
-      if (vaddr == 0xFFFFFFF) {
-        // De-link frame from head of free list
-        startFrame = frame;
-      
-        mmu.movb(startFrame, &free_list_head, size32);
-      }
-      else {
-          startFrame = vaddr;
-          mmu.movb(vaddr, &free_list_head, size32);
-      }
-      
-      --page_frames_free;
-      
-      // Clear page frame to all 0
-      int zero = 0;
-      mmu.movb(startFrame, &zero, kPageSize);
+FrameAllocator::FrameAllocator(unsigned long page_count, mem::MMU* mem) {
+    this->memory = mem;
+    
+    this->memory->set_kernel_PMCB();
+    //store the page count in the memory
+    store_in_memory(page_count, PAGE_FRAMES_TOTAL_OFFSET);
+    //store the avaliable page frames in memory: the 0th frame is reserved
+    store_in_memory(page_count - 1, PAGE_FRAMES_AVALIABLE_OFFSET);
+    //store the address of the next page frame in memory, always the page frame size
+    store_in_memory(PAGE_FRAME_SIZE, AVALIABLE_LIST_HEAD_OFFSET);
+    
+    //create the linked list structure
+    uint32_t current_address = PAGE_FRAME_SIZE;
+    while (current_address < page_count * PAGE_FRAME_SIZE) {
+       uint32_t next_address = current_address + PAGE_FRAME_SIZE;
+       if (next_address >= page_count * PAGE_FRAME_SIZE) {
+           store_in_memory(LIST_END_POINT, current_address);
+           break;
+       }
+       store_in_memory(next_address, current_address);
+       current_address = next_address;
     }
-    
-    // Update free list info
-    set_free_list_head(free_list_head, mmu);
-    set_page_frames_free(page_frames_free, mmu);
-
-    return true;
-  } else {
-    return false;  // do nothing and return error
-  }
 }
 
-bool FrameAllocator::Release(uint32_t count,
-                             std::vector<uint32_t> &page_frames, 
-                             mem::MMU& mmu) {
-  // Fetch free list info
-  uint32_t page_frames_free = get_available(mmu);
-  uint32_t free_list_head = get_free_list_head(mmu);
+FrameAllocator::~FrameAllocator() {
+}
 
-  // If enough to deallocate
-  if(count <= page_frames.size()) {
-    while(count-- > 0) {
-      // Return next frame to head of free list
-      uint32_t frame = page_frames.back();
-      page_frames.pop_back();
-      mmu.movb(frame, &free_list_head, sizeof(uint32_t));
-      free_list_head = frame;
-      ++page_frames_free;
+bool FrameAllocator::allocate(uint32_t count, std::vector<uint32_t> &page_frames, uint32_t vaddr) {
+    if (count > get_avaliable()) {
+        return false;
     }
-
-    // Update free list info
-    set_free_list_head(free_list_head, mmu);
-    set_page_frames_free(page_frames_free, mmu);
-
+    this->memory->set_kernel_PMCB();
+    uint32_t address = 0;
+    uint32_t old_address = 0;
+    int address_count = count;
+    if (vaddr != LIST_END_POINT) {
+        get_head(address);
+        while (address_count > 0) {
+            page_frames.push_back(address);
+            old_address = address;
+            load_from_memory(address, address);
+            set_frame_pointer(0, old_address);
+            address_count--;
+        }
+        set_frames_avaliable(get_avaliable() - count);
+        set_head(address);
+    } else {
+        address = vaddr;
+        int prestart_frame_address = address - PAGE_FRAME_SIZE;
+        // here we decouple frames from inside of the list instead of from its head
+        while (address_count > 0) {
+            page_frames.push_back(address);
+            old_address = address;
+            load_from_memory(address, address);
+            set_frame_pointer(0, old_address);
+            address_count--;
+        }
+        set_frame_pointer(address, prestart_frame_address);
+        set_frames_avaliable(get_avaliable() - count);
+    }
     return true;
-  } else {
-    return false; // do nothing and return error
-  }
 }
 
-std::string FrameAllocator::get_available_list_string(mem::MMU &mmu) const {
-  std::ostringstream out_string;
-  
-  uint32_t next_free = get_free_list_head(mmu);
-  
-  while (next_free != kEndList) {
-    out_string << " " << std::hex << next_free;
-    mem::Addr ad = next_free;
-    mmu.movb(&next_free, ad, sizeof(uint32_t));
-  }
-  
-  return out_string.str();
+bool FrameAllocator::release(uint32_t count, std::vector<uint32_t> &page_frames) {
+    if (count > page_frames.size()) {
+        return false;
+    }
+    this->memory->set_kernel_PMCB();
+    uint32_t end_address;
+    get_head(end_address);
+    int address_count = count;
+    while (address_count > 0) {
+        uint32_t new_frame = page_frames.back();
+        set_frame_pointer(end_address, new_frame);
+        end_address = new_frame;
+        set_head(end_address);
+        page_frames.pop_back();
+        address_count--;
+    }
+    set_frames_avaliable(get_avaliable() + count);
+    return true;
 }
 
-uint32_t FrameAllocator::get_available(mem::MMU &mmu) const {
-  uint32_t page_frames_free;
-  mem::Addr ad = kPageFramesFree;
-  mmu.movb(&page_frames_free, ad, sizeof(uint32_t));
-  return page_frames_free;
+uint32_t FrameAllocator::get_avaliable() const {
+    uint32_t count = 0;
+    load_from_memory(count, PAGE_FRAMES_AVALIABLE_OFFSET);
+    return count;
 }
 
-uint32_t FrameAllocator::get_frames_total(mem::MMU &mmu) const {
-  uint32_t page_frames_total;
-  mem::Addr ad = kPageFramesTotal;
-  mmu.movb(&page_frames_total, ad, sizeof(uint32_t));
-  return page_frames_total;
+std::string FrameAllocator::get_avaliable_list_string() const {
+    std::stringstream list_string;
+    uint32_t read_address;
+    load_from_memory(read_address, AVALIABLE_LIST_HEAD_OFFSET);
+    while (read_address != LIST_END_POINT) {
+        list_string << std::hex << read_address << " ";
+        load_from_memory(read_address, read_address);
+    }
+    return list_string.str();
 }
 
-uint32_t FrameAllocator::get_free_list_head(mem::MMU &mmu) const {
-  uint32_t free_list_head;
-  mem::Addr ad = kFreeListHead;
-  mmu.movb(&free_list_head, ad, sizeof(uint32_t));
-  return free_list_head;
+void FrameAllocator::store_in_memory(uint32_t value, uint32_t address) {
+    this->memory->movb(address, &value, sizeof(uint32_t));
 }
 
-void FrameAllocator::set_page_frames_free(uint32_t page_frames_free, mem::MMU &mmu) {
-  mem::Addr ad = kPageFramesFree;
-  mmu.movb(ad, &page_frames_free, sizeof(uint32_t));
+void FrameAllocator::load_from_memory(uint32_t &value, uint32_t address) const {
+    this->memory->movb(&value, address, sizeof(uint32_t));
 }
 
-void FrameAllocator::set_page_frames_total(uint32_t page_frames_total, mem::MMU &mmu) {
-  mem::Addr ad = kPageFramesTotal;
-  mmu.movb(ad, &page_frames_total, sizeof(uint32_t));
+void FrameAllocator::set_frames_avaliable(uint32_t value) {
+    store_in_memory(value, PAGE_FRAMES_AVALIABLE_OFFSET);
 }
 
-void FrameAllocator::set_free_list_head(uint32_t free_list_head, mem::MMU &mmu) {
-  mem::Addr ad = kFreeListHead;
-  mmu.movb(ad, &free_list_head, sizeof(uint32_t));
+void FrameAllocator::set_frame_pointer(uint32_t value, uint32_t address) {
+    store_in_memory(value, address);
+}
+
+void FrameAllocator::get_head(uint32_t &value) const {
+    load_from_memory(value, AVALIABLE_LIST_HEAD_OFFSET);
+}
+
+void FrameAllocator::set_head(uint32_t &value) {
+    store_in_memory(value, AVALIABLE_LIST_HEAD_OFFSET);
 }

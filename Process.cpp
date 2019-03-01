@@ -139,9 +139,9 @@ void Process::CmdAlloc(const std::string& line,
                        const std::vector<uint32_t>& cmdArgs) {
     Addr vaddr = cmdArgs.at(0);
     uint32_t count = cmdArgs.at(1);
-    if (vaddr % alloc->kPageSize == 0) {
+    if (vaddr % alloc->PAGE_FRAME_SIZE == 0) {
         std::vector<uint32_t> addresses;
-        alloc->Allocate(count, addresses, *memory, vaddr);
+        alloc->allocate(count, addresses, vaddr);
         if (!table_manager->set_process_page_table(process_id)) {
             cerr << "ERROR: There was an issue setting the process page table\n";
             exit(2);
@@ -150,7 +150,7 @@ void Process::CmdAlloc(const std::string& line,
         memory->movb(address_location_and_size, &addresses, address_location_and_size);
         allocated_page_count += count;*/
     } else {
-        cerr << "ERROR: alloc vaddr " << vaddr << " is not a multiple of the page size " << alloc->kPageSize << "\n";
+        cerr << "ERROR: alloc vaddr " << vaddr << " is not a multiple of the page size " << alloc->PAGE_FRAME_SIZE << "\n";
         exit(2);
     }
 }
