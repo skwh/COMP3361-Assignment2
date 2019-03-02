@@ -38,7 +38,7 @@ Process::Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* allocato
   alloc = allocator;
   table_manager = manager;
   
-  process_id = table_manager->allocate_process_page_table(true);
+  process_id = table_manager->allocate_process_page_table();
   allocated_page_count = 0;
 }
 
@@ -69,6 +69,8 @@ void Process::Exec(void) {
       CmdFill(line, cmd, cmdArgs);       // fill bytes with value
     } else if (cmd == "dup") {
       CmdDup(line, cmd, cmdArgs);        // duplicate bytes to dest from source
+    } else if (cmd == "perm") {
+      CmdPerm(line, cmd, cmdArgs);
     } else if (cmd == "print") {
       CmdPrint(line, cmd, cmdArgs);      // dump byte values to output
     } else if (cmd != "*") {
@@ -154,21 +156,6 @@ void Process::CmdAlloc(const std::string& line,
         exit(2);
     }
 }
-/*
-void Process::CmdMemsize(const std::string &line,
-                         const std::string &cmd,
-                         const vector<uint32_t> &cmdArgs) {
-  if (cmdArgs.size() == 1) {
-    // Round up to next multiple of page size
-    Addr pages = (cmdArgs.at(0) + mem::kPageSize - 1) / mem::kPageSize;
-    // Allocate the specified memory size
-    memory = std::make_unique<mem::MMU>(pages);
-  } else {
-    cerr << "ERROR: badly formatted memsize command\n";
-    exit(2);
-  }
-}
-*/
 
 void Process::CmdCmp(const std::string &line,
                      const std::string &cmd,
@@ -274,4 +261,13 @@ void Process::CmdPrint(const std::string &line,
     cout << " " << std::setfill('0') << std::setw(2) << static_cast<uint32_t> (b);
   }
   cout << "\n";
+}
+
+void Process::CmdPerm(const std::string &line,
+                      const std::string &cmd,
+                      const vector<uint32_t> &cmdArgs) {
+    memory->set_kernel_PMCB();
+    mem::Addr vaddr = cmdArgs.at(0);
+    int page_count = cmdArgs.at(1);
+    bool status = cmdArgs.at(2);
 }

@@ -66,7 +66,7 @@ bool FrameAllocator::allocate(uint32_t count, std::vector<uint32_t> &page_frames
         set_frames_avaliable(get_avaliable() - count);
         set_head(address);
     } else {
-        address = vaddr >> 14;
+        address = vaddr;
         int prestart_frame_address = address - PAGE_FRAME_SIZE;
         // here we decouple frames from inside of the list instead of from its head
         while (address_count > 0) {

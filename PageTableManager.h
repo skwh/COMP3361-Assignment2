@@ -29,7 +29,10 @@ public:
     
     virtual ~PageTableManager();
     
-    int allocate_process_page_table(bool set_active);
+    mem::PMCB set_kernel_mode();
+    
+    int allocate_process_page_table();
+    void map_process_table_entries(uint32_t vaddr, int count);
     bool set_process_page_table(int process_id);
     bool remove_process_page_table(int process_id);
     
@@ -39,7 +42,6 @@ private:
     mem::MMU& memory;
     FrameAllocator & frame_allocator;
     std::map<int, mem::PMCB> process_page_tables;
-    
 };
 
 #endif /* PAGETABLEMANAGER_H */

@@ -40,23 +40,6 @@ int main(int argc, char** argv) {
     memory.SetPageFaultHandler(std::make_shared<PageFaultHandler>(page_fault_handler));
     memory.SetWritePermissionFaultHandler(std::make_shared<PermissionFaultHandler>(permission_fault_handler));
     
-    std::vector<uint32_t> addresses;
-    allocator.allocate(1, addresses);
-    
-    mem::PageTable kernel_page_table;
-    
-    for (mem::Addr i = 0; i < num_pages; i++) {
-        kernel_page_table.at(i) = 
-                (i << mem::kPageSizeBits) | mem::kPTE_PresentMask | mem::kPTE_WritableMask;
-    }
-    
-    memory.movb(addresses[0], &kernel_page_table, mem::kPageTableSizeBytes);
-    
-    mem::Addr kernelAddress = addresses[0];
-    
-    mem::PMCB kPMCB(kernelAddress);
-    memory.enter_virtual_mode(kPMCB);
-    
     PageTableManager table_manager(memory, allocator);
     
     Process trace(argv[1], &memory, &allocator, &table_manager);
