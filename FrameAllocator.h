@@ -15,6 +15,7 @@
 #define FRAMEALLOCATOR_H
 
 #include <MMU.h>
+#include <PMCB.h>
 
 #include <vector>
 #include <cstdint>

@@ -35,7 +35,7 @@ int PageTableManager::allocate_process_page_table(bool set_active = true) {
     process_page_tables.insert(std::make_pair(current_process_id_count, user_pmcb));
     int process_id = current_process_id_count;
     if (set_active) {
-        set_process_page_table(process_id);
+        memory.set_user_PMCB(user_pmcb);
     }
     current_process_id_count++;
     return process_id;

@@ -32,7 +32,8 @@ int main(int argc, char** argv) {
     }
     
     mem::MMU memory(128);
-    FrameAllocator allocator(128, &memory);
+    mem::Addr num_pages = memory.get_frame_count();
+    FrameAllocator allocator(num_pages, &memory);
     
     PageFaultHandler page_fault_handler;
     PermissionFaultHandler permission_fault_handler;
@@ -43,7 +44,6 @@ int main(int argc, char** argv) {
     allocator.allocate(1, addresses);
     
     mem::PageTable kernel_page_table;
-    mem::Addr num_pages = memory.get_frame_count();
     
     for (mem::Addr i = 0; i < num_pages; i++) {
         kernel_page_table.at(i) = 

@@ -47,14 +47,14 @@ FrameAllocator::~FrameAllocator() {
 }
 
 bool FrameAllocator::allocate(uint32_t count, std::vector<uint32_t> &page_frames, uint32_t vaddr) {
+    this->memory->set_kernel_PMCB();
     if (count > get_avaliable()) {
         return false;
     }
-    this->memory->set_kernel_PMCB();
     uint32_t address = 0;
     uint32_t old_address = 0;
     int address_count = count;
-    if (vaddr != LIST_END_POINT) {
+    if (vaddr == LIST_END_POINT) {
         get_head(address);
         while (address_count > 0) {
             page_frames.push_back(address);
@@ -66,7 +66,7 @@ bool FrameAllocator::allocate(uint32_t count, std::vector<uint32_t> &page_frames
         set_frames_avaliable(get_avaliable() - count);
         set_head(address);
     } else {
-        address = vaddr;
+        address = vaddr >> 14;
         int prestart_frame_address = address - PAGE_FRAME_SIZE;
         // here we decouple frames from inside of the list instead of from its head
         while (address_count > 0) {
@@ -83,10 +83,10 @@ bool FrameAllocator::allocate(uint32_t count, std::vector<uint32_t> &page_frames
 }
 
 bool FrameAllocator::release(uint32_t count, std::vector<uint32_t> &page_frames) {
+    this->memory->set_kernel_PMCB();
     if (count > page_frames.size()) {
         return false;
     }
-    this->memory->set_kernel_PMCB();
     uint32_t end_address;
     get_head(end_address);
     int address_count = count;
