@@ -26,21 +26,20 @@ using std::string;
 using std::vector;
 
 Process::Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* allocator, PageTableManager* manager) 
-: file_name(file_name_), line_number(0) {
+: file_name(file_name_), 
+        line_number(0),
+        memory(mmu),
+        alloc(allocator),
+        table_manager(manager) {
   // Open the trace file.  Abort program if can't open.
   trace.open(file_name, std::ios_base::in);
   if (!trace.is_open()) {
     cerr << "ERROR: failed to open trace file: " << file_name << "\n";
     exit(2);
   }
-  
-  memory = mmu;
-  alloc = allocator;
-  table_manager = manager;
-  
+  // Create a process page table for this process
   process_id = table_manager->allocate_process_page_table();
   table_manager->set_process_page_table(process_id);
-  allocated_page_count = 0;
 }
 
 Process::~Process() {
@@ -61,7 +60,7 @@ void Process::Exec(void) {
   // Select the command to execute
   while (ParseCommand(line, cmd, cmdArgs)) {
     if (cmd == "alloc" ) {
-      CmdAlloc(line, cmd, cmdArgs);    // allocate memory
+      CmdAlloc(line, cmd, cmdArgs);      // allocate memory
     } else if (cmd == "cmp") {
       CmdCmp(line, cmd, cmdArgs);        // get and compare multiple bytes
     } else if (cmd == "set") {
@@ -71,7 +70,7 @@ void Process::Exec(void) {
     } else if (cmd == "dup") {
       CmdDup(line, cmd, cmdArgs);        // duplicate bytes to dest from source
     } else if (cmd == "perm") {
-      CmdPerm(line, cmd, cmdArgs);
+      CmdPerm(line, cmd, cmdArgs);       // change permissions on a page frame
     } else if (cmd == "print") {
       CmdPrint(line, cmd, cmdArgs);      // dump byte values to output
     } else if (cmd != "*") {

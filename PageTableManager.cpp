@@ -6,7 +6,7 @@
 
 /* 
  * File:   PageTableManager.cpp
- * Author: jason
+ * Author: jason & evan
  * 
  * Created on February 25, 2019, 2:20 PM
  */
@@ -71,15 +71,15 @@ int PageTableManager::allocate_process_page_table() {
 void PageTableManager::map_process_table_entries(uint32_t vaddr, int count) {
     mem::PMCB pr_pmcb = set_kernel_mode();
     // Allocate count pages
-    std::vector<uint32_t> allocate;
-    frame_allocator.allocate(count, allocate);
+    std::vector<uint32_t> allocated_frames;
+    frame_allocator.allocate(count, allocated_frames);
     // Calculate the physical address from the virtual address
     uint32_t physical_address = ((vaddr >> mem::kPageSizeBits) * 4) + pr_pmcb.page_table_base;
     //Iterate over every page table entry and set the present and writable bits 
     for (int i = 0; i < count; i++) {
-        allocate.at(i) |= (mem::kPTE_PresentMask | mem::kPTE_WritableMask);
+        allocated_frames.at(i) |= (mem::kPTE_PresentMask | mem::kPTE_WritableMask);
         //Write the page table entry to to memory
-        memory.movb(physical_address, &allocate.at(i), sizeof(mem::PageTableEntry));
+        memory.movb(physical_address, &allocated_frames.at(i), sizeof(mem::PageTableEntry));
         physical_address += 4;
     }
     

@@ -116,7 +116,6 @@ private:
   PageTableManager* table_manager;
   
   int process_id;
-  int allocated_page_count;
   
   /**
    * ParseCommand - parse a trace file command.
