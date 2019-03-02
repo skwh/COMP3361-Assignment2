@@ -39,6 +39,7 @@ Process::Process(std::string file_name_, mem::MMU* mmu, FrameAllocator* allocato
   table_manager = manager;
   
   process_id = table_manager->allocate_process_page_table();
+  table_manager->set_process_page_table(process_id);
   allocated_page_count = 0;
 }
 
@@ -142,15 +143,7 @@ void Process::CmdAlloc(const std::string& line,
     Addr vaddr = cmdArgs.at(0);
     uint32_t count = cmdArgs.at(1);
     if (vaddr % alloc->PAGE_FRAME_SIZE == 0) {
-        std::vector<uint32_t> addresses;
-        alloc->allocate(count, addresses, vaddr);
-        if (!table_manager->set_process_page_table(process_id)) {
-            cerr << "ERROR: There was an issue setting the process page table\n";
-            exit(2);
-        }
-        /*Addr address_location_and_size = allocated_page_count * sizeof(uint32_t);
-        memory->movb(address_location_and_size, &addresses, address_location_and_size);
-        allocated_page_count += count;*/
+        table_manager->map_process_table_entries(vaddr, count);
     } else {
         cerr << "ERROR: alloc vaddr " << vaddr << " is not a multiple of the page size " << alloc->PAGE_FRAME_SIZE << "\n";
         exit(2);
@@ -172,10 +165,14 @@ void Process::CmdCmp(const std::string &line,
   for (uint32_t i = 0; i < count; ++i) {
     Addr a1 = addr1 + i;
     uint8_t v1 = 0;
-    memory->movb(&v1, a1);
+    if (!memory->movb(&v1, a1)) {
+        return;
+    }
     Addr a2 = addr2 + i;
     uint8_t v2 = 0;
-    memory->movb(&v2, a2);
+    if (!memory->movb(&v2, a2)) {
+        return;
+    }
     if(v1 != v2) {
       cout << std::setfill('0') << std::hex
               << "cmp error"
@@ -270,4 +267,7 @@ void Process::CmdPerm(const std::string &line,
     mem::Addr vaddr = cmdArgs.at(0);
     int page_count = cmdArgs.at(1);
     bool status = cmdArgs.at(2);
+    if (page_count % alloc->PAGE_FRAME_SIZE == 0) {
+        
+    }
 }

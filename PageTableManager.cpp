@@ -69,6 +69,25 @@ int PageTableManager::allocate_process_page_table() {
 }
 
 void PageTableManager::map_process_table_entries(uint32_t vaddr, int count) {
+    mem::PMCB pr_pmcb = set_kernel_mode();
+    // Allocate count pages
+    std::vector<uint32_t> allocate;
+    frame_allocator.allocate(count, allocate);
+    // Calculate the physical address from the virtual address
+    uint32_t physical_address = ((vaddr >> mem::kPageSizeBits) * 4) + pr_pmcb.page_table_base;
+    //Iterate over every page table entry and set the present and writable bits 
+    for (uint32_t i = 0; i < count; i++) {
+        allocate.at(i) |= (mem::kPTE_PresentMask | mem::kPTE_WritableMask);
+        //Write the page table entry to to memory
+        memory.movb(physical_address, &allocate.at(i), sizeof(mem::PageTableEntry));
+        physical_address += 4;
+    }
+    
+    memory.set_user_PMCB(pr_pmcb);
+}
+
+void PageTableManager::set_page_permissions(uint32_t vaddr, int count, bool setting) {
+    mem::PMCB pr_pmcb = set_kernel_mode();
     
 }
 

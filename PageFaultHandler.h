@@ -31,7 +31,7 @@ class PageFaultHandler : public mem::MMU::FaultHandler {
                 default:
                     fault_type = "NONE";
             }
-            std::cout << fault_type << " Page Fault at address " << pmcb.next_vaddress << "\n";
+            std::cout << fault_type << " Page Fault at address " << std::hex << pmcb.next_vaddress << "\n";
             return false;
         }
 };

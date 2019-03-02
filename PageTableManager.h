@@ -19,6 +19,7 @@
 #include <map>
 
 class PageTableManager {
+    
 public:
     PageTableManager(mem::MMU& mem, FrameAllocator& alloc);
     
@@ -33,6 +34,7 @@ public:
     
     int allocate_process_page_table();
     void map_process_table_entries(uint32_t vaddr, int count);
+    void set_page_permissions(uint32_t vaddr, int count, bool setting);
     bool set_process_page_table(int process_id);
     bool remove_process_page_table(int process_id);
     

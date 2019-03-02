@@ -20,7 +20,7 @@
 class PermissionFaultHandler : public mem::MMU::FaultHandler {
     public:
         bool Run(const mem::PMCB& pmcb) {
-            std::cout << "Write Permission Fault at address " << pmcb.next_vaddress << "\n";
+            std::cout << "Write Permission Fault at address " << std::hex << pmcb.next_vaddress << "\n";
             return false;
         }
 };
