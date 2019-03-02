@@ -34,8 +34,9 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}" ./data/trace3v_edge-addr.txt</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" ./data/trace1v.txt</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" ./data/trace5v_pagefaults.txt</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" ./data/trace4v_wprotect.txt</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}" ./data/trace5v_pagefaults.txt</runcommand>
+        <runcommand>"${OUTPUT_PATH}" ./data/trace4v_wprotect.txt</runcommand>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>

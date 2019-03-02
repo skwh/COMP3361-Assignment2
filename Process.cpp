@@ -267,7 +267,10 @@ void Process::CmdPerm(const std::string &line,
     mem::Addr vaddr = cmdArgs.at(0);
     int page_count = cmdArgs.at(1);
     bool status = cmdArgs.at(2);
-    if (page_count % alloc->PAGE_FRAME_SIZE == 0) {
-        
+    if (vaddr % alloc->PAGE_FRAME_SIZE == 0) {
+        table_manager->set_page_permissions(vaddr, page_count, status);
+    } else {
+        cerr << "ERROR: perm vaddr " << std::hex << vaddr << " is not a multiple of the page size " << alloc->PAGE_FRAME_SIZE << "\n";
+        exit(2);
     }
 }

@@ -76,7 +76,7 @@ void PageTableManager::map_process_table_entries(uint32_t vaddr, int count) {
     // Calculate the physical address from the virtual address
     uint32_t physical_address = ((vaddr >> mem::kPageSizeBits) * 4) + pr_pmcb.page_table_base;
     //Iterate over every page table entry and set the present and writable bits 
-    for (uint32_t i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) {
         allocate.at(i) |= (mem::kPTE_PresentMask | mem::kPTE_WritableMask);
         //Write the page table entry to to memory
         memory.movb(physical_address, &allocate.at(i), sizeof(mem::PageTableEntry));
@@ -88,7 +88,19 @@ void PageTableManager::map_process_table_entries(uint32_t vaddr, int count) {
 
 void PageTableManager::set_page_permissions(uint32_t vaddr, int count, bool setting) {
     mem::PMCB pr_pmcb = set_kernel_mode();
-    
+    uint32_t physical_address = ((vaddr >> mem::kPageSizeBits) * 4) + pr_pmcb.page_table_base;
+    for (int i = 0; i < count; i++) {
+        uint32_t page_table_entry;
+        memory.movb(&page_table_entry, physical_address, sizeof(mem::PageTableEntry));
+        if (setting) { //set the writable bit
+            page_table_entry |= mem::kPTE_WritableMask;
+        } else { // clear the writable bit
+            page_table_entry &= mem::kPTE_WritableMask;
+        }
+        memory.movb(physical_address, &page_table_entry, sizeof(mem::PageTableEntry));
+        physical_address += 4;
+    }
+    memory.set_user_PMCB(pr_pmcb);
 }
 
 bool PageTableManager::set_process_page_table(int process_id) {
